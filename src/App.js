@@ -3,49 +3,52 @@ import "./App.css";
 import Todo from "./Components/Todo";
 import icons from "./icons";
 import FlipMove from "react-flip-move";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  addNote,
+  delNote,
+  selectNotes,
+  updateANote,
+} from "./features/noteSlice";
 
 function App() {
   const [todo, setTodo] = useState("");
-  const [todos, setTodos] = useState([]);
   const [updateATodo, setUpdateATodo] = useState("");
-  const [updateField, setUpdateField] = useState({
-    visibility: false,
-    indexValue: 0,
-  });
+  const [selectedIndex, setSelectedIndex] = useState();
   const [isPopUpActive, setIsPopUpActive] = useState(false);
+  const dispatch = useDispatch();
+  const notesList = useSelector(selectNotes);
 
   const addTodo = (e) => {
     e.preventDefault();
-    setTodos([
-      ...todos,
-      {
+    dispatch(
+      addNote({
         status: false,
-        todo,
-      },
-    ]);
+        todo: todo,
+      })
+    );
     setTodo("");
   };
 
   const deleteTodo = (index) => {
-    const newTodos = [...todos];
-    newTodos.splice(index, 1);
-    setTodos(newTodos);
+    dispatch(delNote(index));
   };
 
   const updateTodo = (index) => {
     setIsPopUpActive(true);
-    setUpdateField({ visibility: true, indexValue: index });
-   
+    setSelectedIndex(index);
   };
 
   const updateSelectedTodo = (e) => {
     e.preventDefault();
-    const newTodos = [...todos];
-    newTodos.splice(updateField.indexValue, 1, {
-      visibility: false,
-      todo: updateATodo,
-    });
-    setTodos(newTodos);
+
+    dispatch(
+      updateANote({
+        visibility: false,
+        todo: updateATodo,
+        indexValue: selectedIndex,
+      })
+    );
     setUpdateATodo("");
     setIsPopUpActive(false);
   };
@@ -85,7 +88,7 @@ function App() {
         enterAnimation={customEnterAnimation}
         leaveAnimation={customLeaveAnimation}
       >
-        {todos.map((todo, index) => (
+        {notesList.map((todo, index) => (
           <Todo
             key={index}
             todo={todo.todo}
